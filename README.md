@@ -22,7 +22,7 @@ The application brings service discovery, agreement review, Noir funding and bil
 
 ## Try Tandem
 
-Open **[Tandem](https://tandem-production-5e00.up.railway.app)** for the public testnet application. Choose **Explore Tandem** for the prefilled read-only review account, or create a separate private workspace. The local application runs at **http://localhost:4176** after setup below.
+Open **[Tandem](https://tandem.allensaji.dev)** for the public testnet application. Choose **Explore Tandem** for the prefilled read-only review account, or create a separate private workspace. The local application runs at **http://localhost:4176** after setup below.
 
 | Entry point | What you can do |
 | --- | --- |

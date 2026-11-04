@@ -2,7 +2,7 @@
 
 The root Dockerfile builds the Rust wallet and web application from source, then packages them with Node 22. Deploy one service with one persistent volume mounted at `/state`. The application runs as the unprivileged `node` user after the entrypoint prepares the volume root. A filesystem lock prevents two application processes from sharing that state.
 
-Public testnet instance: [tandem-production-5e00.up.railway.app](https://tandem-production-5e00.up.railway.app).
+Public testnet instance: [tandem.allensaji.dev](https://tandem.allensaji.dev).
 
 ## Configuration
 
