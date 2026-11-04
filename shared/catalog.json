@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "network": "zcash-testnet",
+  "consensus": "NU7",
+  "currency": "TAZ",
+  "services": [
+    {
+      "id": "network-telemetry",
+      "name": "Network Telemetry",
+      "provider": "Tandem",
+      "category": "Infrastructure",
+      "summary": "A paid feed of Zcash testnet chain height, consensus branch and latest block time.",
+      "description": "Subscribe for a fixed service period. After the supplier independently verifies your shielded payment, your invoice unlocks a fresh network observation. Every access checks the receipt and original service expiry.",
+      "status": "available",
+      "operator_notice": "Tandem operates this reference supplier and the payment service. It is not an independent third-party company.",
+      "amount_zatoshis": "1000000",
+      "max_fee_zatoshis": "100000",
+      "intervals": [
+        {
+          "seconds": 600,
+          "label": "Every 10 minutes"
+        },
+        {
+          "seconds": 3600,
+          "label": "Every hour"
+        },
+        {
+          "seconds": 86400,
+          "label": "Every day"
+        }
+      ],
+      "payment_counts": [1, 2, 3],
+      "delivers": [
+        "Current chain height",
+        "NU7 consensus branch",
+        "Latest block time",
+        "Independent payment receipt"
+      ],
+      "requirements": [
+        "Your own private workspace",
+        "At least 0.011 TAZ spendable",
+        "An explicit agreement authorization"
+      ],
+      "links": {
+        "details": "/services/network-telemetry",
+        "subscribe": "/app/agreements?service=network-telemetry&create",
+        "api": "/api/catalog/network-telemetry"
+      }
+    }
+  ]
+}

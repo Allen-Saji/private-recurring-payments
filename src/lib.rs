@@ -10,3 +10,5 @@ pub mod receipt;
 pub mod service;
 pub mod supplier;
 pub mod wallet;
+
+pub mod workspace;

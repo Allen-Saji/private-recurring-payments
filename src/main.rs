@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use fs2::FileExt;
-use private_recurring_wallet::{control, funding, payment, service, supplier, wallet};
+use private_recurring_wallet::{control, funding, payment, service, supplier, wallet, workspace};
 use std::{fs::OpenOptions, os::unix::fs::OpenOptionsExt, path::PathBuf};
 
 #[derive(Parser)]
@@ -14,6 +14,7 @@ struct Args {
 }
 #[derive(Subcommand)]
 enum Command {
+    Workspace,
     Supplier {
         #[command(subcommand)]
         command: supplier::Command,
@@ -46,6 +47,9 @@ async fn main() -> Result<()> {
         .install_default()
         .ok();
     let args = Args::parse();
+    if matches!(args.command, Command::Workspace) {
+        return workspace::rpc(&args.state_dir).await;
+    }
     if let Command::Supplier { command } = &args.command {
         return supplier::run(&args.state_dir, command).await;
     }
