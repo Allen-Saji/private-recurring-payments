@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: supplier.Dockerfile
+    user: "${PRP_UID:-1000}:${PRP_GID:-1000}"
+    restart: unless-stopped
+    init: true
+    read_only: true
+    network_mode: host
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 30s
+    pids_limit: 512
+    volumes:
+      - ${PRP_BINARY:?absolute Rust binary path}:/usr/local/bin/prp:ro
+      - ${APP_STATE_DIR:?private application state directory}:/state
+      - ../app:/app/app:ro
+      - ../shared:/app/shared:ro
+      - ../web/dist-product:/app/web/dist-product:ro
+    environment:
+      PRP_BINARY: /usr/local/bin/prp
+      APP_STATE_DIR: /state
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:4176}
+      APP_PORT: ${APP_PORT:-4176}
+      JUDGE_EVIDENCE_FILE: ${JUDGE_EVIDENCE_FILE:-}
+      MAX_ACCOUNTS: ${MAX_ACCOUNTS:-50}
+    command: [flock, -n, /state/application.lock, node, /app/app/server.mjs]
+    healthcheck:
+      test: [CMD, node, -e, "const http=require('node:http');const u=new URL(process.env.APP_ORIGIN);http.get({host:'127.0.0.1',port:process.env.APP_PORT,path:'/session',headers:{host:u.host}},r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

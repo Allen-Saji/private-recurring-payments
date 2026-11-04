@@ -79,3 +79,20 @@ services:
       SUPPLIER_SOCKET: /supplier-rpc/supplier.sock
       SUPPLIER_TOKEN_FILE: /supplier-rpc/execution.token
     command: [node, /app/agent/mcp.mjs]
+  billing:
+    profiles: [workspace]
+    image: node@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
+    user: "${PRP_UID:-1000}:${PRP_GID:-1000}"
+    read_only: true
+    network_mode: host
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - ../web/billing:/app/billing:ro
+      - ../web/dist-billing:/app/dist-billing:ro
+      - ${API_TOKEN_FILE:?private API token file}:/api.token:ro
+      - ${BILLING_ACCESS_FILE:-/dev/null}:/access.token:ro
+    environment:
+      API_TOKEN_FILE: /api.token
+      BILLING_ACCESS_FILE: /access.token
+    command: [node, /app/billing/server.mjs]
