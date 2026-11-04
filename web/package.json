@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "dev:landing": "vite --config landing/vite.config.ts",
+    "build:landing": "tsc -p landing/tsconfig.json && vite build --config landing/vite.config.ts",
+    "preview:landing": "vite preview --config landing/vite.config.ts"
   },
   "dependencies": {
     "@noir-wallet/sdk": "0.1.9",

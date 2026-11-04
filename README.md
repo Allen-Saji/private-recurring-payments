@@ -4,6 +4,17 @@ A Zcash testnet signer for company-approved recurring supplier payments. Two pin
 
 Agreement authorization, monthly UTC and testnet interval schedules, revocation, a durable occurrence ledger, authenticated execution API, and an agent client are implemented. A separately confined supplier issues persistent invoices, independently verifies shielded receipts, and gates a live testnet telemetry API. A durable recurring worker collects invoices and handles payment-to-service delivery. A local authenticated HTTP bridge exposes the backend to application servers; six MCP tools expose the constrained flow to AI agent hosts. Amendments, production key custody and multi-tenant internet authentication remain outside this implementation. See the [agreement operator guide](docs/agreements.md) and [backend API and deployment guide](docs/backend-api.md).
 
+## Product landing page
+
+The separate animated landing page introduces private recurring payments and includes an illustrative testnet walkthrough. It does not connect a wallet or move funds.
+
+```sh
+npm ci --prefix web
+npm --prefix web run dev:landing
+```
+
+Open http://127.0.0.1:4174/. Use `npm --prefix web run build:landing` for a production build. See the [landing guide](docs/landing.md) for assets, accessibility, print behavior and integration boundaries.
+
 ## Build
 
 Requires Linux, Rust 1.96 or compatible, Node 22, npm, a C compiler, and CMake. Dependencies are pinned in the lockfiles:
