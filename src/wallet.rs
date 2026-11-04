@@ -81,14 +81,11 @@ async fn connect_inner() -> Result<CompactTxStreamerClient<tonic::transport::Cha
     ensure!(info.chain_name == "test", "Server is not on testnet");
     let reported = u32::from_str_radix(info.consensus_branch_id.trim_start_matches("0x"), 16)
         .context("Invalid server consensus branch")?;
-    let expected = u32::from(BranchId::for_height(
-        &NETWORK,
-        BlockHeight::from_u32(u32::try_from(info.block_height)?),
-    ));
-    ensure!(
-        reported == expected,
-        "Consensus mismatch: server {reported:08x}, SDK {expected:08x}; signing is disabled"
-    );
+    validate_network(
+        &info.chain_name,
+        reported,
+        u32::try_from(info.block_height)?,
+    )?;
     Ok(client)
 }
 
@@ -163,4 +160,33 @@ pub fn status(path: &Path) -> Result<Value> {
         }
     }
     Ok(public)
+}
+
+fn validate_network(chain: &str, reported: u32, height: u32) -> Result<()> {
+    ensure!(chain == "test", "Server is not on testnet");
+    let expected = BranchId::for_height(&NETWORK, BlockHeight::from_u32(height));
+    ensure!(
+        expected == BranchId::Nu7,
+        "NU7 testnet is required; signing is disabled"
+    );
+    ensure!(
+        reported == u32::from(expected),
+        "Consensus mismatch: server {reported:08x}, SDK {:08x}; signing is disabled",
+        u32::from(expected)
+    );
+    Ok(())
+}
+#[cfg(test)]
+mod network_tests {
+    use super::*;
+    use zcash_protocol::consensus::{NetworkUpgrade, Parameters};
+    #[test]
+    fn nu7_is_a_required_network_not_just_a_compatible_sdk() {
+        let height = u32::from(NETWORK.activation_height(NetworkUpgrade::Nu7).unwrap());
+        assert!(validate_network("test", u32::from(BranchId::Nu7), height).is_ok());
+        let old = BranchId::for_height(&NETWORK, BlockHeight::from_u32(height - 1));
+        assert!(validate_network("test", u32::from(old), height - 1).is_err());
+        assert!(validate_network("main", u32::from(BranchId::Nu7), height).is_err());
+        assert!(validate_network("test", u32::from(old), height).is_err());
+    }
 }
