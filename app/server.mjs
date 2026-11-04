@@ -121,6 +121,13 @@ export function createApplication({
           res.end(JSON.stringify(body));
         }
       };
+      // Railway probes use their own Host. Exempt only this data-free endpoint.
+      if (
+        req.url === "/healthz" &&
+        ["GET", "HEAD"].includes(req.method) &&
+        [publicOrigin.host, "healthcheck.railway.app"].includes(req.headers.host)
+      )
+        return send(closed ? 503 : 200, { ok: !closed });
       if (req.headers.host !== publicOrigin.host)
         return send(403, { error: "Host not allowed" });
       if (req.headers.origin && req.headers.origin !== origin)
@@ -546,8 +553,10 @@ if (
     origin: process.env.APP_ORIGIN || "http://localhost:4176",
     maxAccounts: Number(process.env.MAX_ACCOUNTS || 50),
   });
-  app.server.listen(Number(process.env.APP_PORT || 4176), "127.0.0.1", () =>
-    console.log("Tandem application ready."),
+  app.server.listen(
+    Number(process.env.APP_PORT || process.env.PORT || 4176),
+    process.env.APP_HOST || "127.0.0.1",
+    () => console.log("Tandem application ready."),
   );
   process.on("SIGTERM", () => {
     void app.close().then(() => process.exit(0));

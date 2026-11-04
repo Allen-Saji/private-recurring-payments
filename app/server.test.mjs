@@ -77,6 +77,23 @@ test("account sessions isolate wallets, jobs and invoice reads across HTTP", asy
     });
   }
   assert.equal((await request("/api/workspace")).status, 401);
+  const healthHeaders = { host: "healthcheck.railway.app" };
+  assert.deepEqual(
+    (await request("/healthz", { headers: healthHeaders })).body,
+    { ok: true },
+  );
+  assert.equal((await request("/healthz")).status, 200);
+  for (const route of ["/session", "/api/workspace", "/healthz?private=1"]) {
+    assert.equal((await request(route, { headers: healthHeaders })).status, 403);
+  }
+  assert.equal(
+    (await request("/healthz", { headers: healthHeaders, body: {} })).status,
+    403,
+  );
+  assert.equal(
+    (await request("/healthz", { headers: { host: "attacker.example" } })).status,
+    403,
+  );
   assert.equal(
     (await request("/session", { headers: { host: "attacker.example" } }))
       .status,
