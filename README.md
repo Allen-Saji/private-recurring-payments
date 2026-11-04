@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  Private recurring payments. Clear agreements. Verifiable invoices.
+  Private B2B payments. Recurring agreements. Billing and invoices.
 </p>
 
 <p align="center">
@@ -14,9 +14,9 @@
   <a href="docs/workspaces.md">Operations</a>
 </p>
 
-Tandem lets a business authorize a recurring supplier relationship and delegate its routine payments. A Rust signer checks the agreed recipient, amount, schedule, expiry and spending caps before signing a shielded Zcash payment. The supplier issues a signed invoice and independently verifies receipt before granting service access.
+Tandem is a private B2B workspace for recurring supplier payments, billing and invoicing. A company chooses a service, reviews the payment schedule and spending limits, and authorizes an agreement. Agents can then handle routine payments within those approved terms.
 
-The application brings service discovery, agreement review, Noir funding and billing records into one workspace. Payment details stay shielded on-chain; the authorized parties retain the records needed to understand each charge.
+Each charge has a signed invoice, a payment status and a supplier-verified receipt. Companies can review their billing history, export records and stop future payments from the same workspace. Shielded Zcash settlement keeps payment details private on-chain; the application and authorized parties retain the business records they need.
 
 **Release:** Zcash NU7 testnet only. The app uses service-managed operating wallets and approval keys. This is not a mainnet custody service.
 
@@ -51,11 +51,20 @@ Review access cannot authorize payments, send funds, cancel agreements or change
 6. **Follow settlement.** A transaction ID is a submission. A paid invoice requires the supplier's independent receipt verification.
 7. **Use the service or stop renewals.** Open the paid resource from its invoice. Cancellation stops future signing while preserving billing history.
 
+### Billing and invoicing
+
+- **A signed invoice for each billing period:** stable invoice number, supplier and buyer identifiers, service dates, line item and exact charge.
+- **Separate payment states:** unpaid, awaiting verification and paid. A transaction ID alone does not mark an invoice paid; the supplier checks its own received payment.
+- **Records for reconciliation:** filter and search invoices, inspect receipts, export signed JSON or loaded rows as CSV, and print an invoice to PDF.
+- **History after cancellation:** stopping renewals preserves past invoices and receipts.
+
+This release supports fixed-price testnet billing. It does not calculate tax or provide statutory tax-invoice compliance, fiat conversion, proration, refunds or credit notes. See [billing semantics and exports](docs/billing.md).
+
 ### Available service
 
 **Network Telemetry**, operated by Tandem, provides Zcash testnet chain height, consensus branch and latest block time. Each paid service period costs **0.01 TAZ**, with at most **0.001 TAZ** network fee per payment. Choose one to three payments, every ten minutes, hour or day. The maximum allowance for three payments is **0.033 TAZ**, including fees.
 
-This is the first connected reference supplier, not a marketplace of independent companies. Additional services will be listed after their payment and receipt integrations are verified. Self-service supplier publishing is not implemented.
+This is the first connected reference supplier, not a marketplace of independent companies. Additional services will be listed after their payment and receipt integrations are verified. Companies can choose the cadence and payment count; the service price is fixed. Negotiated pricing, counteroffers and self-service supplier publishing are not implemented.
 
 ## How it works
 

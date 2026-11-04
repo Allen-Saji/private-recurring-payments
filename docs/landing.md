@@ -24,7 +24,7 @@ The build writes to `web/dist-landing`. The preview server uses port 4174, so st
 
 - The hero combines a transparent generated sculpture with an HTML agreement card. CSS handles entrance motion, light sweep, and subtle movement; pointer movement adds parallax on mouse devices.
 - The walkthrough tabs support pointer activation, Up/Down arrows, Home, and End. Example amounts use TAZ and are labeled as testnet examples.
-- A Pause motion control and `prefers-reduced-motion` stop animation. All content remains visible with reduced motion.
+- Animation automatically respects `prefers-reduced-motion`. There is no manual motion toggle; all content remains visible when the system requests reduced motion.
 - The phone navigation and native FAQ disclosures work without backend services.
 - The website has no floating Download PDF button. Native browser printing remains supported; invoice PDF export is a separate action inside the invoice toolbar.
 
