@@ -1,6 +1,6 @@
 # Landing page
 
-The product landing page is a separate React application in `web/landing`. It introduces private recurring Zcash payments and includes an illustrative agreement-to-receipt walkthrough. It does not connect a wallet, call the payment API, or move funds. The product name is provisional.
+The product landing page lives in `web/landing` and is served with the account application at the same origin. It introduces private recurring Zcash payments, links to the service catalog and agent guide, and opens prefilled review access. Its agreement-to-receipt walkthrough remains labeled illustrative content; actual invoices and receipts live in authenticated workspaces.
 
 ## Run locally
 
@@ -11,7 +11,7 @@ npm ci --prefix web
 npm --prefix web run dev:landing
 ```
 
-Open http://127.0.0.1:4174/. The existing funding application continues to use its own entry point and port.
+Open http://127.0.0.1:4174/ for standalone visual development. Use the unified application at http://localhost:4176 to exercise navigation, account access, services and funding.
 
 ```sh
 npm --prefix web run build:landing
@@ -26,12 +26,12 @@ The build writes to `web/dist-landing`. The preview server uses port 4174, so st
 - The walkthrough tabs support pointer activation, Up/Down arrows, Home, and End. Example amounts use TAZ and are labeled as testnet examples.
 - A Pause motion control and `prefers-reduced-motion` stop animation. All content remains visible with reduced motion.
 - The phone navigation and native FAQ disclosures work without backend services.
-- Download PDF invokes the browser's print dialog. Print styles reveal all sections and capture the current walkthrough state.
+- The website has no floating Download PDF button. Native browser printing remains supported; invoice PDF export is a separate action inside the invoice toolbar.
 
 ## Assets
 
-DM Sans and Instrument Serif are served locally under `web/landing/public/fonts`, with their SIL Open Font License notices. The cobalt sculpture is generated artwork in `web/landing/public/sealed-sculpture.png`. The folded brand mark is an SVG in the same public directory. No third-party font or image requests are required at runtime.
+DM Sans and Instrument Serif are served locally under `web/landing/public/fonts`, with their SIL Open Font License notices. The cobalt sculpture is generated artwork in `web/landing/public/sealed-sculpture.png`. The folded brand mark, favicon variants, centered README logo and generated OG image are in the same public directory. No third-party font or image requests are required at runtime.
 
 ## Integration boundary
 
-The landing calls to action navigate within the page. Connect them to the application only when an authenticated user flow is ready. API capabilities belong on the application server, never in browser code. Keep illustration state separate from live signer observations and supplier entitlement checks.
+Explore Tandem opens the prefilled read-only review login. Browse services opens the public curated directory; supplier setup continues to company sign-in or account creation. For agents opens the public workflow and API guide. The gateway serves canonical/social metadata, crawlable summaries, JSON discovery and OpenAPI from the configured origin. Backend capabilities remain server-side. Illustration state stays separate from actual signer observations and supplier entitlement checks.

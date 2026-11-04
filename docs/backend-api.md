@@ -68,8 +68,12 @@ The supplier image copies the pinned official Node binary into the tested Ubuntu
 
 The stdio adapter uses the official TypeScript MCP SDK, pinned in `agent/package-lock.json`. It follows the [official MCP server interface](https://modelcontextprotocol.io/docs/develop/build-server) and keeps stdout reserved for protocol messages. Install its dependencies with `npm ci --ignore-scripts --prefix agent`.
 
-Six tools expose the same enforcement boundary: `get_payment_overview`, `get_current_invoice`, `submit_signed_invoice`, `get_payment_status`, `verify_supplier_payment`, and `get_paid_resource`. Submit accepts the exact supplier envelope as `invoice_json`. Unknown tools and invalid input schemas are rejected. Generic signing, key export, agreement installation and revocation are absent.
+Eight tools expose the same enforcement boundary: `get_payment_overview`, `get_current_invoice`, `submit_signed_invoice`, `get_payment_status`, `verify_supplier_payment`, `get_paid_resource`, `list_billing_invoices`, and `get_billing_invoice`. Submit accepts the exact supplier envelope as `invoice_json`. Unknown tools and invalid input schemas are rejected. Generic signing, key export, agreement installation and revocation are absent.
 
 Launch through `docker compose -p prp-services -f deploy/backend.compose.yaml run --rm -T mcp` with the deployment variables already set. Configure that command as a stdio MCP server in the agent host. The MCP container has no network, wallet-state mounts or approval keys. Direct `node agent/mcp.mjs` is available for development, but running on the host does not provide the container filesystem boundary.
 
 `agent/verify-mcp.mjs` checks a real MCP handshake, tool discovery, signer overview, unknown-tool refusal and invalid identifier refusal. It does not submit a payment. A downstream model may decide when to call these tools; model output never overrides signed agreement terms.
+
+## Billing records and owner workspace
+
+The billing API adds GET /v1/billing (optional before cursor) and GET /v1/billing/invoices/:invoice_id. The current account-based application serves billing at `/app/invoices` on port 4176. See [workspaces.md](workspaces.md) for the application gateway and account isolation. See [billing.md](billing.md) for invoice signatures, state semantics, pagination, migration and exports.
