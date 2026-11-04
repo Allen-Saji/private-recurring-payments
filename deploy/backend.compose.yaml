@@ -1,0 +1,81 @@
+services:
+  supplier:
+    build:
+      context: .
+      dockerfile: supplier.Dockerfile
+    user: "${PRP_UID:-1000}:${PRP_GID:-1000}"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - ${PRP_BINARY:?absolute binary path}:/usr/local/bin/prp:ro
+      - ${SUPPLIER_STATE:?private supplier state}:/state
+      - ${SUPPLIER_RPC:?private supplier socket directory}:/rpc
+      - ../supplier:/app/supplier:ro
+    environment:
+      PRP_BINARY: /usr/local/bin/prp
+      SUPPLIER_STATE: /state
+      SUPPLIER_SOCKET: /rpc/supplier.sock
+      SUPPLIER_TOKEN_FILE: /rpc/execution.token
+    command: [flock, -n, /rpc/server.lock, node, /app/supplier/server.mjs]
+  api:
+    image: node@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
+    user: "${PRP_UID:-1000}:${PRP_GID:-1000}"
+    read_only: true
+    network_mode: host
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - ../api:/app/api:ro
+      - ../agent:/app/agent:ro
+      - ${PRP_RPC:?signer socket directory}:/signer-rpc:ro
+      - ${SUPPLIER_RPC:?supplier socket directory}:/supplier-rpc:ro
+      - ${API_TOKEN_FILE:?private API token file}:/api.token:ro
+    environment:
+      API_TOKEN_FILE: /api.token
+      API_PORT: ${API_PORT:-4318}
+      API_ALLOWED_ORIGINS: ${API_ALLOWED_ORIGINS:-http://localhost:4173,http://localhost:5173}
+      SIGNER_SOCKET: /signer-rpc/signer.sock
+      SIGNER_TOKEN_FILE: /signer-rpc/execution.token
+      SUPPLIER_SOCKET: /supplier-rpc/supplier.sock
+      SUPPLIER_TOKEN_FILE: /supplier-rpc/execution.token
+    command: [node, /app/api/server.mjs]
+  renewals:
+    profiles: [worker]
+    image: node@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
+    user: "${PRP_UID:-1000}:${PRP_GID:-1000}"
+    read_only: true
+    network_mode: none
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - ../agent:/app/agent:ro
+      - ${PRP_RPC:?signer socket directory}:/signer-rpc:ro
+      - ${SUPPLIER_RPC:?supplier socket directory}:/supplier-rpc:ro
+      - ${AGENT_STATE:?private worker journal}:/agent-state
+    environment:
+      SIGNER_SOCKET: /signer-rpc/signer.sock
+      SIGNER_TOKEN_FILE: /signer-rpc/execution.token
+      SUPPLIER_SOCKET: /supplier-rpc/supplier.sock
+      SUPPLIER_TOKEN_FILE: /supplier-rpc/execution.token
+      AGENT_STATE: /agent-state
+    entrypoint:
+      [flock, -n, /agent-state/worker.lock, node, /app/agent/renew.mjs]
+  mcp:
+    profiles: [tools]
+    image: node@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
+    user: "${PRP_UID:-1000}:${PRP_GID:-1000}"
+    read_only: true
+    network_mode: none
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - ../agent:/app/agent:ro
+      - ${PRP_RPC:?signer socket directory}:/signer-rpc:ro
+      - ${SUPPLIER_RPC:?supplier socket directory}:/supplier-rpc:ro
+    environment:
+      SIGNER_SOCKET: /signer-rpc/signer.sock
+      SIGNER_TOKEN_FILE: /signer-rpc/execution.token
+      SUPPLIER_SOCKET: /supplier-rpc/supplier.sock
+      SUPPLIER_TOKEN_FILE: /supplier-rpc/execution.token
+    command: [node, /app/agent/mcp.mjs]

@@ -1,0 +1,11 @@
+.deps/
+target/
+node_modules/
+web/dist/
+.env
+.env.*
+state/
+*.sqlite*
+*.pczt
+*.seed
+web/dist-landing/

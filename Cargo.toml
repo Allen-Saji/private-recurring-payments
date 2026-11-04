@@ -1,0 +1,48 @@
+[package]
+name = "private-recurring-wallet"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tonic = { version = "0.14", features = ["channel", "tls-ring", "tls-webpki-roots"] }
+rustls = { version = "0.23", features = ["ring"] }
+rand = "0.10"
+rand_core = "0.10"
+secrecy = "0.8"
+zeroize = "1"
+hex = "0.4"
+sha2 = "0.10"
+rusqlite = { version = "0.37", features = ["bundled", "array"] }
+zcash_client_backend = { version = "=0.25.0", features = ["lightwalletd-tonic", "lightwalletd-tonic-tls-webpki-roots", "sync", "pczt"] }
+zcash_client_sqlite = { version = "=0.23.0", features = ["orchard", "serde", "transparent-inputs"] }
+zcash_protocol = "=0.11.0"
+zcash_keys = { version = "=0.17.0", features = ["orchard", "sapling"] }
+zcash_primitives = "=0.31.0"
+orchard = { version = "=0.16.0", features = ["circuit"] }
+pczt = { version = "=0.10.0", features = ["prover", "signer", "tx-extractor"] }
+zip32 = "0.3"
+futures-util = "0.3"
+async-trait = "0.1"
+prost = "0.14"
+fs2 = "0.4"
+ed25519-dalek = "=3.0.0"
+serde_jcs = "=0.2.0"
+time = "0.3"
+subtle = "2.6"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.dev]
+opt-level = 1
+debug = 0
+incremental = false
+
+[profile.dev.package."*"]
+opt-level = 2

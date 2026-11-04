@@ -1,0 +1,25 @@
+services:
+  signer:
+    image: ubuntu@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+    user: "${PRP_UID:-1000}:${PRP_GID:-1000}"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - ${PRP_BINARY:?absolute binary path}:/usr/local/bin/prp:ro
+      - ${PRP_STATE:?private signer state directory}:/state
+      - ${PRP_RPC:?private socket and execution token directory}:/rpc
+    command: [/usr/local/bin/prp, --state-dir, /state, serve, --socket, /rpc/signer.sock, --execution-token-file, /rpc/execution.token]
+  agent:
+    profiles: [tools]
+    image: node@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
+    user: "${PRP_UID:-1000}:${PRP_GID:-1000}"
+    read_only: true
+    network_mode: none
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - ../agent:/app:ro
+      - ${PRP_RPC:?private socket and execution token directory}:/rpc:ro
+      - ${PRP_INVOICES:?signed invoice inbox}:/invoices:ro
+    entrypoint: [node, /app/client.mjs, /rpc/signer.sock, /rpc/execution.token]
