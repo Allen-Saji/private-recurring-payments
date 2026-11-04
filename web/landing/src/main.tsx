@@ -259,9 +259,6 @@ function Walkthrough() {
 
 function App() {
   const [menu, setMenu] = useState(false);
-  const [motionPaused, setMotionPaused] = useState(
-    localStorage.getItem("tandem:motion") === "off",
-  );
   const heroRef = useRef<HTMLDivElement>(null);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -288,7 +285,7 @@ function App() {
       preference.removeEventListener("change", update);
     };
   }, []);
-  const quiet = motionPaused || reducedMotion;
+  const quiet = reducedMotion;
   return (
     <div className={`site ${quiet ? "motion-paused" : ""}`}>
       <a className="skip-link" href="#main">
@@ -399,23 +396,6 @@ function App() {
               <span>Scroll to unfold</span>
               <span className="down-arrow">&#8595;</span>
             </a>
-            <button
-              onClick={() => {
-                setMotionPaused(!motionPaused);
-                localStorage.setItem(
-                  "tandem:motion",
-                  motionPaused ? "on" : "off",
-                );
-              }}
-              aria-pressed={motionPaused}
-            >
-              {quiet ? "Motion off" : "Pause motion"}
-              <span className="motion-bars" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
-            </button>
           </div>
         </section>
         <section className="intro section-wrap" id="product">

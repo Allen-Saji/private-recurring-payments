@@ -568,35 +568,6 @@ dd {
   font-size: 20px;
   color: var(--ink);
 }
-.hero-bottom button {
-  background: none;
-  border: 0;
-  font-size: 10px;
-  color: #72766e;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-height: 44px;
-}
-.motion-bars {
-  display: flex;
-  gap: 2px;
-  align-items: center;
-  height: 14px;
-}
-.motion-bars i {
-  width: 2px;
-  height: 9px;
-  background: var(--blue);
-  animation: equalize 1.5s ease-in-out infinite;
-}
-.motion-bars i:nth-child(2) {
-  animation-delay: 0.3s;
-  height: 14px;
-}
-.motion-bars i:nth-child(3) {
-  animation-delay: 0.6s;
-}
 .intro {
   padding-top: 90px;
   padding-bottom: 100px;
@@ -1587,11 +1558,6 @@ dd {
   .hero-bottom > a {
     font-size: 9px;
     gap: 10px;
-  }
-  .hero-bottom button {
-    font-size: 9px;
-    padding-right: 0;
-    gap: 6px;
   }
   .section-wrap {
     padding: 65px 6%;

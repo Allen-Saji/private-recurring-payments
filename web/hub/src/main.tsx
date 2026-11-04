@@ -6,11 +6,8 @@ import { amount, date } from "../../billing/src/format";
 import "../../shared/product.css";
 const service = catalog.services[0];
 function PublicShell({ children }: { children: React.ReactNode }) {
-  const [quiet, setQuiet] = useState(
-    () => localStorage.getItem("tandem:motion") === "off",
-  );
   return (
-    <div className={quiet ? "t-quiet h-public" : "h-public"}>
+    <div className="h-public">
       <header className="t-header">
         <a className="t-brand" href="/" aria-label="Tandem home">
           <Mark />
@@ -22,27 +19,9 @@ function PublicShell({ children }: { children: React.ReactNode }) {
           <a href="/services">Services</a>
           <a href="/agents">For agents</a>
           <a href="/#privacy">Privacy</a>
-          <button
-            className="t-link-button h-mobile-motion"
-            onClick={() => {
-              localStorage.setItem("tandem:motion", quiet ? "on" : "off");
-              setQuiet(!quiet);
-            }}
-          >
-            {quiet ? "Motion off" : "Pause motion"}
-          </button>
         </nav>
         <div className="t-meta">
           <span className="t-network">NU7 testnet</span>
-          <button
-            className="t-link-button"
-            onClick={() => {
-              localStorage.setItem("tandem:motion", quiet ? "on" : "off");
-              setQuiet(!quiet);
-            }}
-          >
-            {quiet ? "Motion off" : "Pause motion"}
-          </button>
           <a className="t-button outline" href="/app">
             Open workspace
           </a>

@@ -60,9 +60,6 @@ export function WorkspaceApp({
     [workspace, setWorkspace] = useState<any>(null),
     [loading, setLoading] = useState(true),
     [error, setError] = useState("");
-  const [quiet, setQuiet] = useState(
-    () => localStorage.getItem("tandem:motion") === "off",
-  );
   async function refresh() {
     try {
       const w = await api("/api/workspace");
@@ -115,7 +112,7 @@ export function WorkspaceApp({
   }
   const busy = workspace && ["queued", "running"].includes(workspace.state);
   return (
-    <div className={quiet ? "t-quiet" : ""}>
+    <div>
       <header className="t-header t-no-print">
         <a className="t-brand" href="/" aria-label="Tandem home">
           <Mark />
@@ -147,15 +144,6 @@ export function WorkspaceApp({
         <div className="t-meta">
           <span className="t-network">Zcash NU7 testnet</span>
           {username && <span className="t-account">{username}</span>}
-          <button
-            className="t-link-button"
-            onClick={() => {
-              setQuiet(!quiet);
-              localStorage.setItem("tandem:motion", quiet ? "on" : "off");
-            }}
-          >
-            {quiet ? "Motion off" : "Pause motion"}
-          </button>
           {username && (
             <button
               className="t-link-button"

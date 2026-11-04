@@ -368,10 +368,6 @@ select:focus-visible {
 .t-enter:nth-child(3) {
   animation-delay: 0.12s;
 }
-.t-quiet * {
-  animation: none !important;
-  transition: none !important;
-}
 .t-account {
   max-width: 140px;
   overflow: hidden;
