@@ -72,8 +72,35 @@ export function createApi({
         const exact = (keys) =>
           Object.keys(body).sort().join(",") === [...keys].sort().join(",");
         const url = new URL(req.url, "http://localhost");
+        if (req.method === "GET" && url.pathname === "/v1/billing") {
+          const values = [...url.searchParams];
+          const cursor = url.searchParams.get("before");
+          if (
+            values.length > 1 ||
+            values.some(([key]) => key !== "before") ||
+            (cursor !== null &&
+              (!/^[1-9][0-9]{0,15}$/.test(cursor) ||
+                !Number.isSafeInteger(Number(cursor))))
+          )
+            return send(400, { error: "Invalid billing cursor" });
+          const result = await supplier({
+            op: "billing",
+            before: cursor === null ? null : Number(cursor),
+          });
+          return send(result.ok ? 200 : 409, result);
+        }
         if (url.search)
           return send(400, { error: "Query parameters are not supported" });
+        if (
+          req.method === "GET" &&
+          /^\/v1\/billing\/invoices\/[a-f0-9]{64}$/.test(url.pathname)
+        ) {
+          const result = await supplier({
+            op: "billing_invoice",
+            invoice_id: url.pathname.split("/").at(-1),
+          });
+          return send(result.ok ? 200 : 409, result);
+        }
         let result;
         if (req.method === "GET" && url.pathname === "/v1/overview") {
           const [a, b] = await Promise.all([

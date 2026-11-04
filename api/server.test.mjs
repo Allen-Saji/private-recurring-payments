@@ -76,6 +76,42 @@ test("HTTP bridge authenticates requests, rejects browser injection and keeps ad
     );
     assert.deepEqual(calls, [{ op: "invoice" }]);
     assert.equal(
+      (await fetch(base + "/v1/billing?before=10", { headers: auth })).status,
+      200,
+    );
+    assert.deepEqual(calls.at(-1), { op: "billing", before: 10 });
+    assert.equal(
+      (await fetch(base + "/v1/billing?before=0", { headers: auth })).status,
+      400,
+    );
+    assert.equal(
+      (await fetch(base + "/v1/billing?before=1&before=2", { headers: auth }))
+        .status,
+      400,
+    );
+    assert.equal(
+      (
+        await fetch(base + "/v1/billing?before=9007199254740992", {
+          headers: auth,
+        })
+      ).status,
+      400,
+    );
+    const invoiceId = "1".repeat(64);
+    assert.equal(
+      (
+        await fetch(base + "/v1/billing/invoices/" + invoiceId, {
+          headers: auth,
+        })
+      ).status,
+      200,
+    );
+    assert.deepEqual(calls.at(-1), {
+      op: "billing_invoice",
+      invoice_id: invoiceId,
+    });
+
+    assert.equal(
       (
         await fetch(base + "/v1/payments", {
           method: "POST",

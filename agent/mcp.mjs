@@ -96,4 +96,18 @@ add(
   { invoice_id: id },
   (args) => supplier({ op: "access", ...args }),
 );
+add(
+  "list_billing_invoices",
+  "Read numbered invoices, billing totals and separate payment/collection states. Results are recorded observations, not fresh network verification.",
+  {
+    before: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(),
+  },
+  ({ before }) => supplier({ op: "billing", before: before ?? null }),
+);
+add(
+  "get_billing_invoice",
+  "Read a supplier-signed billing document bound to the original payment request, with the recorded receipt and service period.",
+  { invoice_id: id },
+  ({ invoice_id }) => supplier({ op: "billing_invoice", invoice_id }),
+);
 await server.connect(new StdioServerTransport());

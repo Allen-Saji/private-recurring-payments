@@ -1,4 +1,5 @@
 use crate::{
+    billing,
     policy::{self, Agreement, Envelope, Invoice, Revocation, Trust},
     receipt::{self, Receipt},
     wallet,
@@ -23,6 +24,7 @@ use zeroize::Zeroizing;
 #[derive(Subcommand)]
 pub enum Command {
     InitWallet,
+    DocumentExisting,
     Configure {
         #[arg(long)]
         agreement: PathBuf,
@@ -50,6 +52,8 @@ struct Config {
 #[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
 enum Action {
     Overview {},
+    Billing { before: Option<u64> },
+    BillingInvoice { invoice_id: String },
     Invoice {},
     Settle { invoice_id: String, txid: String },
     Access { invoice_id: String },
@@ -57,11 +61,11 @@ enum Action {
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Issued {
-    envelope: Envelope<Invoice>,
-    period_start: u64,
-    service_until: u64,
-    payment_memo: String,
+pub(crate) struct Issued {
+    pub(crate) envelope: Envelope<Invoice>,
+    pub(crate) period_start: u64,
+    pub(crate) service_until: u64,
+    pub(crate) payment_memo: String,
 }
 
 struct Store {
@@ -86,8 +90,10 @@ impl Store {
         db.busy_timeout(Duration::from_secs(5))?;
         db.pragma_update(None, "journal_mode", "WAL")?;
         db.pragma_update(None, "synchronous", "FULL")?;
+        db.pragma_update(None, "foreign_keys", "ON")?;
         db.execute_batch("CREATE TABLE IF NOT EXISTS identity (singleton INTEGER PRIMARY KEY CHECK(singleton=1),config TEXT NOT NULL,revoked INTEGER NOT NULL DEFAULT 0,sequence INTEGER NOT NULL DEFAULT 0,revocation_digest TEXT);
           CREATE TABLE IF NOT EXISTS invoices (id TEXT PRIMARY KEY,period TEXT NOT NULL UNIQUE,issued TEXT NOT NULL,txid TEXT UNIQUE,receipt TEXT,verified INTEGER NOT NULL DEFAULT 0 CHECK(verified IN (0,1)));")?;
+        billing::init(&db)?;
         let encoded = serde_jcs::to_string(&config)?;
         db.execute(
             "INSERT OR IGNORE INTO identity(singleton,config) VALUES(1,?1)",
@@ -170,6 +176,7 @@ impl Store {
                 serde_jcs::to_string(&issued)?
             ],
         )?;
+        billing::create(&transaction, &issued, a, key, now)?;
         transaction.commit()?;
         Ok(issued)
     }
@@ -306,6 +313,7 @@ async fn verify(root: &Path, store: &mut Store, id: &str, txid: &str) -> Result<
     let i = store.invoice(id)?;
     // Commit uncertainty first. Any timeout, crash, scan failure or reorg cannot
     // leave an old observation sufficient to grant access.
+    billing::claim(&store.db, id, txid, policy::now()?)?;
     store.pending(id)?;
     let evidence = receipt::received(
         &root.join("wallet"),
@@ -314,7 +322,14 @@ async fn verify(root: &Path, store: &mut Store, id: &str, txid: &str) -> Result<
         &i.payment_memo,
         store.config.confirmations,
     )
-    .await?;
+    .await;
+    let evidence = match evidence {
+        Ok(value) => value,
+        Err(error) => {
+            billing::claim_error(&store.db, id, &error.to_string())?;
+            return Err(error);
+        }
+    };
     store.accept(id, &evidence)?;
     Ok(evidence)
 }
@@ -323,6 +338,18 @@ async fn rpc(root: &Path, action: Action) -> Result<Value> {
     let mut store = Store::open(root)?;
     match action {
         Action::Overview {} => store.overview(),
+        Action::Billing { before } => billing::list(
+            &store.db,
+            &store.config.agreement.payload,
+            before,
+            policy::now()?,
+        ),
+        Action::BillingInvoice { invoice_id } => billing::detail(
+            &store.db,
+            &store.config.agreement.payload,
+            &invoice_id,
+            policy::now()?,
+        ),
         Action::Invoice {} => Ok(serde_json::to_value(
             store.issue(&key(root)?, policy::now()?)?,
         )?),
@@ -355,6 +382,19 @@ async fn rpc(root: &Path, action: Action) -> Result<Value> {
     }
 }
 
+pub async fn execute(root: &Path, value: Value) -> Result<Value> {
+    let lock = fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .mode(0o600)
+        .open(root.join("supplier.lock"))?;
+    lock.try_lock_exclusive()
+        .context("Supplier is processing another operation")?;
+    rpc(root, policy::decode(&serde_json::to_vec(&value)?)?).await
+}
+
 pub async fn run(root: &Path, command: &Command) -> Result<()> {
     wallet::private_dir(root)?;
     let lock = fs::OpenOptions::new()
@@ -367,6 +407,30 @@ pub async fn run(root: &Path, command: &Command) -> Result<()> {
     lock.try_lock_exclusive()
         .context("Supplier worker busy; retry")?;
     match command {
+        Command::DocumentExisting => {
+            let mut store = Store::open(root)?;
+            let signing_key = key(root)?;
+            let a = store.config.agreement.payload.clone();
+            let tx = store
+                .db
+                .transaction_with_behavior(TransactionBehavior::Immediate)?;
+            let issued = {
+                let mut q = tx.prepare("SELECT issued FROM invoices ORDER BY rowid")?;
+                q.query_map([], |r| r.get::<_, String>(0))?
+                    .collect::<Result<Vec<_>, _>>()?
+            };
+            for encoded in &issued {
+                billing::create(
+                    &tx,
+                    &policy::decode(encoded.as_bytes())?,
+                    &a,
+                    &signing_key,
+                    policy::now()?,
+                )?;
+            }
+            tx.commit()?;
+            println!("{}", json!({"documented_invoices":issued.len()}));
+        }
         Command::InitWallet => {
             wallet::init(&root.join("wallet"), "supplier-service").await?;
             let mut bytes = Zeroizing::new([0u8; 32]);
