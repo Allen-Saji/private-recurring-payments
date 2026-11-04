@@ -22,7 +22,7 @@ The application brings service discovery, agreement review, Noir funding and bil
 
 ## Try Tandem
 
-A public deployment has not been configured yet. The local application runs at **http://localhost:4176** after setup below. There is no production URL to advertise.
+Open **[Tandem](https://tandem-production-5e00.up.railway.app)** for the public testnet application. Choose **Explore Tandem** for the prefilled read-only review account, or create a separate private workspace. The local application runs at **http://localhost:4176** after setup below.
 
 | Entry point | What you can do |
 | --- | --- |
@@ -137,6 +137,8 @@ Open **http://localhost:4176** in the browser containing Noir. Use the testnet e
 Without Docker, start `flock -n "$APP_STATE_DIR/application.lock" node app/server.mjs` with the same environment. Run one application process per state directory. Existing state is never replaced by startup.
 
 For public testing, configure the exact HTTPS `APP_ORIGIN`, a domain and TLS proxy, and persistent storage. The app binds to loopback; `deploy/Caddyfile.product` is the proxy sample. Cookie security derives from the configured HTTPS origin. See [deployment, backups and review access](docs/workspaces.md).
+
+For Railway, use the self-contained root Dockerfile and a persistent `/state` volume. The container listens on `0.0.0.0` using `PORT`; direct local runs still default to loopback. See [Railway setup and release checks](docs/railway.md).
 
 ## Trust boundaries and current limits
 
