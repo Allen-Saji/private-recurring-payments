@@ -1,0 +1,6 @@
+{
+  "username": "judge",
+  "password": "tandem-review",
+  "role": "reviewer",
+  "notice": "Public read-only review access. These credentials cannot move funds or change agreements."
+}
