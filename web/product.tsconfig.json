@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src",
+    "billing/src",
+    "landing/src",
+    "shared",
+    "workspace/src",
+    "hub/src"
+  ],
+  "compilerOptions": {
+    "resolveJsonModule": true
+  }
+}

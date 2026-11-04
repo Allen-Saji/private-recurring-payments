@@ -9,3 +9,7 @@ state/
 *.pczt
 *.seed
 web/dist-landing/
+
+web/dist-billing/
+
+web/dist-product/

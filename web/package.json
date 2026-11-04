@@ -9,7 +9,11 @@
     "test": "node --test test/*.test.mjs",
     "dev:landing": "vite --config landing/vite.config.ts",
     "build:landing": "tsc -p landing/tsconfig.json && vite build --config landing/vite.config.ts",
-    "preview:landing": "vite preview --config landing/vite.config.ts"
+    "preview:landing": "vite preview --config landing/vite.config.ts",
+    "build:billing": "tsc -p billing/tsconfig.json && vite build --config billing/vite.config.ts",
+    "serve:billing": "node billing/server.mjs",
+    "test:billing": "node --test billing/*.test.mjs",
+    "build:product": "tsc -p product.tsconfig.json && vite build --config product.vite.config.ts"
   },
   "dependencies": {
     "@noir-wallet/sdk": "0.1.9",
