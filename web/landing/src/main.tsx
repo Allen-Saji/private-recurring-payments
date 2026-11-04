@@ -88,8 +88,8 @@ function Agreement({ compact = false }: { compact?: boolean }) {
           <span />
         </div>
         <div>
-          <strong>SignalFeed</strong>
-          <span>Monthly data subscription</span>
+          <strong>Network telemetry</strong>
+          <span>Recurring network data</span>
         </div>
         <span className="verified">
           <Icon name="check" />
@@ -99,22 +99,22 @@ function Agreement({ compact = false }: { compact?: boolean }) {
       <div className="agreement-price">
         <span>Payment amount</span>
         <div>
-          0.10 <small>TAZ / month</small>
+          0.01 <small>TAZ / payment</small>
         </div>
       </div>
       <dl>
         <div>
           <dt>Next payment</dt>
-          <dd>Dec 4</dd>
+          <dd>Every 10 minutes</dd>
         </div>
         <div>
           <dt>Network fee limit</dt>
-          <dd>0.0001 TAZ</dd>
+          <dd>0.001 TAZ</dd>
         </div>
       </dl>
       <div className="agreement-bottom">
         <span className="status-dot" />
-        Within your approved terms<span>TESTNET EXAMPLE</span>
+        Within your approved terms<span>EXAMPLE AGREEMENT</span>
       </div>
     </div>
   );
@@ -123,19 +123,19 @@ function Agreement({ compact = false }: { compact?: boolean }) {
 const steps = [
   {
     title: "Set the terms.",
-    copy: "Choose the supplier, amount, schedule, and fee limit. See exactly what you are authorizing.",
+    copy: "Choose a schedule and spending limit for network telemetry. Review the fixed amount, recipient, and fee allowance.",
     label: "01 / YOUR AGREEMENT",
     status: "Ready for review",
   },
   {
     title: "Let the routine run.",
-    copy: "Valid invoices follow the agreement. A changed amount or destination needs fresh approval.",
+    copy: "The signer checks each invoice against your agreement. Changed amounts or destinations are refused.",
     label: "02 / PAYMENT CHECK",
     status: "Terms match",
   },
   {
     title: "Keep the full picture.",
-    copy: "Track the payment and its receipt together. Stop future payments from the agreement.",
+    copy: "Keep numbered invoices, signed billing records, and verified receipts together. Export your records or stop future payments.",
     label: "03 / YOUR RECEIPT",
     status: "Payment confirmed",
   },
@@ -219,27 +219,27 @@ function Walkthrough() {
                 <span />
                 <span />
               </div>
-              <strong>SignalFeed</strong>
+              <strong>Network telemetry</strong>
               <Icon name={step === 2 ? "check" : "file"} />
             </div>
             <div className="document-amount">
-              0.10 <span>TAZ</span>
+              0.01 <span>TAZ</span>
             </div>
             <p className="document-sub">
-              {step === 2 ? "December payment" : "Once a month"}
+              {step === 2 ? "Recurring payment" : "Every 10 minutes"}
             </p>
             <dl>
               <div>
                 <dt>{step === 2 ? "Payment date" : "Next payment"}</dt>
-                <dd>Dec 4</dd>
+                <dd>Every 10 minutes</dd>
               </div>
               <div>
                 <dt>Network fee limit</dt>
-                <dd>0.0001 TAZ</dd>
+                <dd>0.001 TAZ</dd>
               </div>
               <div>
                 <dt>{step === 2 ? "Settlement" : "Agreement ends"}</dt>
-                <dd>{step === 2 ? "Shielded" : "Apr 4, 2027"}</dd>
+                <dd>{step === 2 ? "Shielded" : "After three payments"}</dd>
               </div>
             </dl>
             <div className="document-status">
@@ -248,7 +248,8 @@ function Walkthrough() {
             </div>
           </div>
           <p className="example-note">
-            Illustrative walkthrough. No funds are moved.
+            Example terms. Your workspace records the actual agreement and
+            receipts.
           </p>
         </div>
       </div>
@@ -258,7 +259,9 @@ function Walkthrough() {
 
 function App() {
   const [menu, setMenu] = useState(false);
-  const [motionPaused, setMotionPaused] = useState(false);
+  const [motionPaused, setMotionPaused] = useState(
+    localStorage.getItem("tandem:motion") === "off",
+  );
   const heroRef = useRef<HTMLDivElement>(null);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -301,12 +304,12 @@ function App() {
           className={menu ? "open" : ""}
           onClick={() => setMenu(false)}
         >
-          <a href="#product">Product</a>
+          <a href="/services">Services</a>
           <a href="#how-it-works">How it works</a>
-          <a href="#privacy">Privacy</a>
+          <a href="/agents">For agents</a>
         </nav>
-        <a className="button button-outline header-cta" href="#how-it-works">
-          Explore the flow
+        <a className="button button-outline header-cta" href="/app">
+          Sign in
           <Icon name="arrow" />
         </a>
         <button
@@ -331,17 +334,17 @@ function App() {
               On <em>your</em> terms.
             </h1>
             <p className="hero-lede">
-              Approve the agreement.
+              Private supplier payments. Signed invoices.
               <br />
-              Let recurring payments follow it.
+              Approve the limits. Let the routine run.
             </p>
             <div className="hero-actions">
-              <a className="button button-primary" href="#how-it-works">
-                See how it works
+              <a className="button button-primary" href="/app?review">
+                Explore Tandem
                 <Icon name="arrow" />
               </a>
-              <a className="text-link" href="#privacy">
-                Private by design
+              <a className="text-link" href="/services">
+                Browse services
                 <Icon name="arrow" />
               </a>
             </div>
@@ -349,7 +352,7 @@ function App() {
               <span className="zcash-symbol" aria-hidden="true">
                 Z
               </span>
-              Built for shielded payments on Zcash.
+              Built for shielded payments on Zcash NU7 testnet.
             </p>
           </div>
           <div
@@ -397,7 +400,13 @@ function App() {
               <span className="down-arrow">&#8595;</span>
             </a>
             <button
-              onClick={() => setMotionPaused(!motionPaused)}
+              onClick={() => {
+                setMotionPaused(!motionPaused);
+                localStorage.setItem(
+                  "tandem:motion",
+                  motionPaused ? "on" : "off",
+                );
+              }}
               aria-pressed={motionPaused}
             >
               {quiet ? "Motion off" : "Pause motion"}
@@ -411,9 +420,7 @@ function App() {
         </section>
         <section className="intro section-wrap" id="product">
           <div className="reveal">
-            <span className="eyebrow">
-              LESS PAYMENT ADMIN. MORE PEACE OF MIND.
-            </span>
+            <span className="eyebrow">A RECORD FOR EVERY PAYMENT</span>
             <h2>
               Keep your payments moving.
               <br />
@@ -449,13 +456,13 @@ function App() {
           <div className="reveal control-copy">
             <span className="eyebrow">02 / CONTROL THAT STAYS WITH YOU</span>
             <h2 id="control-heading">
-              A little automation.
+              Approve the terms.
               <br />
-              <em>Clear boundaries.</em>
+              <em>Keep the limits.</em>
             </h2>
             <p>
-              An approval belongs to a specific agreement. Changes do not
-              quietly become permission.
+              An approval belongs to a specific agreement. Changed terms require
+              a new authorization.
             </p>
             <a className="text-link" href="#questions">
               A few things to know
@@ -530,8 +537,8 @@ function App() {
               <h3>Useful records remain.</h3>
               <p>
                 Your business, supplier, and authorized payment service can
-                access the records they handle. Privacy does not mean hiding
-                your own receipts from you.
+                access the records they handle. Signed invoices and payment
+                receipts stay available in your workspace.
               </p>
             </article>
             <article>
@@ -558,7 +565,7 @@ function App() {
             {[
               [
                 "Is this a wallet?",
-                "Tandem is being built around recurring supplier agreements and private payments. Funding comes from a wallet; the payment service checks each renewal against the terms you approved.",
+                "Tandem handles recurring supplier agreements, shielded payments, and invoices. Fund your workspace from Noir; the payment service checks each renewal against your approved terms.",
               ],
               [
                 "Can I pay any subscription?",
@@ -574,7 +581,7 @@ function App() {
               ],
               [
                 "Can I use it today?",
-                "The product is in testnet development. This page previews the experience; the agreement-management app is still being completed. The walkthrough moves no funds.",
+                "Open the review workspace with prefilled judge credentials to inspect real invoices without a wallet. Create your own account to fund a dedicated wallet and subscribe to Network Telemetry. Use testnet TAZ only; Tandem manages workspace signing keys.",
               ],
             ].map(([question, answer]) => (
               <details key={question}>
@@ -599,11 +606,11 @@ function App() {
             <br />
             <em>everything else.</em>
           </h2>
-          <a className="button button-primary reveal" href="#how-it-works">
-            Explore a payment
+          <a className="button button-primary reveal" href="/app?create">
+            Create your workspace
             <Icon name="arrow" />
           </a>
-          <p>Built on Zcash. Currently in testnet development.</p>
+          <p>Private workspaces. Shielded settlement. NU7 testnet.</p>
         </section>
       </main>
       <footer className="site-footer">
@@ -611,20 +618,17 @@ function App() {
           <Mark />
           tandem<span className="brand-period">.</span>
         </a>
-        <span>Private payments, considered.</span>
+        <a href="/agents">For agents</a>
+        <a href="/services">Service directory</a>
         <a href="#privacy">
           Privacy &amp; trust
           <Icon name="arrow" />
         </a>
         <span className="testnet-note">
           <span className="status-dot" />
-          Testnet development
+          NU7 testnet
         </span>
       </footer>
-      <button className="pdf-button no-print" onClick={() => window.print()}>
-        <Icon name="download" />
-        Download PDF
-      </button>
     </div>
   );
 }
